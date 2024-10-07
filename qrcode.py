@@ -1,8 +1,5 @@
 import streamlit as st
 import pandas as pd
-import cv2
-import numpy as np
-from PIL import Image
 
 st.header("Base de Dados - Jacaratinha Brinquedos")
 bdd = pd.read_csv(r"database.csv", encoding="utf-8", sep="\t")
