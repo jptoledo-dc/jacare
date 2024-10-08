@@ -1,9 +1,11 @@
 import streamlit as st
 import pandas as pd
+from PIL import Image
+st.set_page_config(layout="wide")
 
 st.header("Base de Dados - Jacaratinha Brinquedos")
 bdd = pd.read_csv(r"database.csv", encoding="utf-8", sep="\t")
-bdd.columns= ["Cod. Interno","SKU","Nome Produto", "Reforço", "Tamanho Embalagem","Anuncio?","Imagem"]
+bdd.columns= ["Cod. Interno","SKU","Nome Produto", "Reforço", "Tamanho Embalagem","Corredor","Localização","Anuncio?","Imagem"]
 
 radio = st.radio("",["Resumo de Pedidos","QRCode","Consulta"],horizontal = True)
 
@@ -63,5 +65,16 @@ elif radio == "Consulta":
     filtros.subheader("Possui anuncio ativo? \n"+bdd.loc[bdd['SKU'] == cod_produto, 'Anuncio?'].values[0])
     filtros.subheader("Precisa reforçar acetato? \n"+bdd.loc[bdd['SKU'] == cod_produto, 'Reforço'].values[0])
 
+    loc = bdd.loc[bdd['SKU'] == cod_produto, 'Localização'].values[0]
     imagem_valor =  bdd.loc[bdd['SKU'] == cod_produto, 'Imagem'].values[0]
     imagens.image(imagem_valor, width=500)
+    
+
+
+    try:
+        with st.expander("Localização"):
+            filtros.subheader("Localização:  "+loc)
+            mapa = Image.open(f"mapa{loc}.png")
+            st.image(mapa)
+    except:
+        st.title("Não contém localização")
