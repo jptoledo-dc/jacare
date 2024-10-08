@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
+import xlrd
 st.set_page_config(layout="wide")
 
 st.header("Base de Dados - Jacaratinha Brinquedos")
