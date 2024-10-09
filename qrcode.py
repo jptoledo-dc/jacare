@@ -1,14 +1,14 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
-
+import pyperclip
 st.set_page_config(layout="wide")
 
 st.header("Base de Dados - Jacaratinha Brinquedos")
 bdd = pd.read_csv(r"database.csv", encoding="utf-8", sep="\t")
 bdd.columns= ["Cod. Interno","SKU","Nome Produto", "Reforço", "Tamanho Embalagem","Corredor","Localização","Anuncio?","Imagem"]
 
-radio = st.radio("",["Resumo de Pedidos","QRCode","Consulta"],horizontal = True)
+radio = st.radio("",["Resumo de Pedidos","QRCode","Consulta","Imprimir Etiquetas"],horizontal = True)
 
 if radio == "Resumo de Pedidos":
     st.header("Resumo dos Pedidos")
@@ -52,7 +52,7 @@ if radio == "Resumo de Pedidos":
         bag6.metric("Personalizado",(pedidoSKU['Tamanho Embalagem'].str.contains('Personalizad', case=False, na=False).sum()))
 
     else:
-        st.title("Por favor, suba um arquivo RelPedidosCorImp.xls")
+        st.subheader("Por favor, suba um arquivo RelPedidosCorImp.xls")
 
 elif radio == "QRCode":
     st.subheader("Leitor de QRCode")
@@ -79,3 +79,83 @@ elif radio == "Consulta":
             st.image(mapa)
     except:
         st.title("Não contém localização")
+    
+elif radio == "Imprimir Etiquetas":
+    st.header("Imprimir Etiquetas")
+    entrada_de_dados = st.text_area("Cole as duas colunas (Pedido ATOM e SKU):")
+    fragmentado = entrada_de_dados.split("\n")
+    def_largura = 800
+    def_altura = 150
+    def_thickness = 5
+    molde = f"^GB{def_largura},{def_altura},{def_thickness}^FS"
+
+    #Acima de 15 é 50
+    #Até 15 é 170
+    #Gerador de Etiquetas
+    lista_pronta = []
+    impressao = []
+    impressao.append("^XA\n")
+    contador = 0
+    field_origin_box = 0
+    field_origin_text_width = 20
+    tamanho_lista = len(fragmentado)
+    cont_geral = 1
+    if len(entrada_de_dados) >0:
+        for linha in fragmentado:
+            if contador < 7:
+                if cont_geral != tamanho_lista:
+
+                    if len(linha) >= 15:
+                        field_origin_text = 50
+                    else:
+                        field_origin_text = 170
+                    impressao.append(f"""
+                            ^FO0,{field_origin_box}
+                            ^GB{def_largura},{def_altura},{def_thickness}^FS
+                            ^FO{field_origin_text},{field_origin_text_width}
+                            ^AF,120,20
+                            ^FD{linha}^FS
+                            """)
+                    contador += 1
+                    field_origin_box += 150
+                    field_origin_text_width += 150
+                    cont_geral += 1
+                else:
+                    if len(linha) >= 15:
+                        field_origin_text = 50
+                    else:
+                        field_origin_text = 170
+                    impressao.append(f"""
+                            ^FO0,{field_origin_box}
+                            ^GB{def_largura},{def_altura},{def_thickness}^FS
+                            ^FO{field_origin_text},{field_origin_text_width}
+                            ^AF,120,20
+                            ^FD{linha}^FS
+                            """)
+                    impressao.append("\n^XZ\n")
+                    lista_pronta.append("".join(impressao))
+            elif contador == 7:
+                if len(linha) >= 15:
+                        field_origin_text = 50
+                else:
+                        field_origin_text = 170
+                impressao.append(f"""^FO0,{field_origin_box}
+                                ^GB{def_largura},{def_altura},{def_thickness}^FS
+                                ^FO{field_origin_text},{field_origin_text_width}
+                                ^AF,120,20
+                                ^FD{linha}^FS""")
+                impressao.append("\n^XZ\n")
+                contador = 0
+                field_origin_box = 0
+                field_origin_text_width = 20
+                lista_pronta.append("".join(impressao))
+                impressao = []
+                impressao.append("^XA\n")
+                cont_geral += 1
+
+
+        resultado = "".join(lista_pronta).replace("	"," ")
+        pyperclip.copy(resultado)
+        st.write("Resultado copiado!")
+    else:
+        pass
