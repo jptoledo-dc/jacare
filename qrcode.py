@@ -155,7 +155,6 @@ elif radio == "Imprimir Etiquetas":
 
 
         resultado = "".join(lista_pronta).replace("	"," ")
-        pyperclip.copy(resultado)
-        st.write("Resultado copiado!")
+        st.text_area(label="Copie o resultado!, value=resultado)
     else:
         pass
