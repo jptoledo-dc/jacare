@@ -155,6 +155,6 @@ elif radio == "Imprimir Etiquetas":
 
 
         resultado = "".join(lista_pronta).replace("	"," ")
-        st.text_area(label="Copie o resultado!, value=resultado)
+        st.text_area(label="Copie o resultado!", value=resultado)
     else:
         pass
