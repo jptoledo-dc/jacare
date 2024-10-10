@@ -1,7 +1,9 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
-import pyperclip
+import win32print
+import win32api
+
 st.set_page_config(layout="wide")
 
 st.header("Base de Dados - Jacaratinha Brinquedos")
@@ -88,7 +90,7 @@ elif radio == "Imprimir Etiquetas":
     def_altura = 150
     def_thickness = 5
     molde = f"^GB{def_largura},{def_altura},{def_thickness}^FS"
-
+    imprimir = st.button("Imprimir etiquetas")
     #Acima de 15 é 50
     #Até 15 é 170
     #Gerador de Etiquetas
@@ -155,6 +157,27 @@ elif radio == "Imprimir Etiquetas":
 
 
         resultado = "".join(lista_pronta).replace("	"," ")
-        st.text_area(label="Copie o resultado!", value=resultado)
+        st.text_area(label="Copie e resultado!",value=resultado)
+        st.write("Resultado copiado!")
+        printers = win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS)
+
+        hPrinter = win32print.OpenPrinter("ZDesigner ZD220-203dpi ZPL")
+
+        if imprimir:
+            try:
+                # Iniciar um trabalho de impressão
+                hJob = win32print.StartDocPrinter(hPrinter, 1, ("ZPL Print Job", None, "RAW"))
+                win32print.StartPagePrinter(hPrinter)
+
+                # Enviar o comando ZPL para a impressora
+                win32print.WritePrinter(hPrinter, resultado.encode())
+
+                # Finalizar o trabalho de impressão
+                win32print.EndPagePrinter(hPrinter)
+                win32print.EndDocPrinter(hPrinter)
+            finally:
+                win32print.ClosePrinter(hPrinter)
+            
+
     else:
         pass
