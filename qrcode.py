@@ -1,10 +1,12 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
+import win32print
 
-st.set_page_config(layout="wide")
-
-st.header("Base de Dados - Jacaratinha Brinquedos")
+st.set_page_config(layout="wide",page_title="Jacaratinha Brinquedos",page_icon = "Jacaratinha.png")
+img, name = st.columns([1,4])
+img.image("Jacaratinha.png",width=100)
+name.title("Base de Dados - Jacaratinha Brinquedos")
 bdd = pd.read_csv(r"database.csv", encoding="utf-8", sep="\t")
 bdd.columns= ["Cod. Interno","SKU","Nome Produto", "Reforço", "Tamanho Embalagem","Corredor","Localização","Anuncio?","Imagem"]
 
