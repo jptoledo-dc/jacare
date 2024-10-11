@@ -177,23 +177,36 @@ elif radio == "Imprimir Etiquetas":
         pass
 
 elif radio == "Alterar informações":
-    st.title("Alteração de Informações na base de dados")
-    col_infos, col_alter = st.columns([2,3])
-    prod_id = col_infos.selectbox("Selecione o produto que deseja alterar",bdd["SKU"].sort_values(ascending=True))
-    infos_imagem =  bdd.loc[bdd['SKU'] == prod_id, 'Imagem'].values[0]
-    col_infos.image(infos_imagem, width=500)
+    col_sa, col_sb = st.columns([4,1])
+    if 'acesso' not in st.session_state:
+        st.session_state.acesso = False
+    if not st.session_state.acesso:
+        senha_acesso = col_sa.text_input("Insira a senha:",type="password")
+        st.error("ATENÇÃO! ESSA ABA EXIGE PRIVILÉGIO DE ADMINISTRADOR, POR FAVOR, INSIRA A SENHA DE ACESSO:")
+        if col_sb.button("Acessar"):
+            if senha_acesso == "PipocaCrocante":
+                st.success("Acesso garantido")
+                st.session_state.acesso = True
+            else:
+                st.error("Senha errada, por favor, tente novamente!")
+    if st.session_state.acesso:
+        st.title("Alteração de Informações na base de dados")
+        col_infos, col_alter = st.columns([2,3])
+        prod_id = col_infos.selectbox("Selecione o produto que deseja alterar",bdd["SKU"].sort_values(ascending=True))
+        infos_imagem =  bdd.loc[bdd['SKU'] == prod_id, 'Imagem'].values[0]
+        col_infos.image(infos_imagem, width=500)
 
-    at_ci = bdd.loc[bdd['SKU'] == prod_id, 'Cod. Interno'].values[0]
-    at_sku = col_alter.text_input(label="SKU",value=bdd.loc[bdd['SKU'] == prod_id, 'SKU'].values[0])
-    at_np = col_alter.text_input(label="Nome do Produto",value=bdd.loc[bdd['SKU'] == prod_id, 'Nome Produto'].values[0])
-    at_te = col_alter.text_input(label="Tamanho da Embalagem",value=bdd.loc[bdd['SKU'] == prod_id, 'Tamanho Embalagem'].values[0])
-    at_loc = col_alter.text_input(label="Localização",value=bdd.loc[bdd['SKU'] == prod_id, 'Localização'].values[0])
-    at_crd = col_alter.text_input(label="Corredor",value=bdd.loc[bdd['SKU'] == prod_id, 'Corredor'].values[0])
-    at_anun = col_alter.text_input(label="Anuncio?",value=bdd.loc[bdd['SKU'] == prod_id, 'Anuncio?'].values[0])
-    at_ref = col_alter.text_input(label="Reforço de Acetato",value=bdd.loc[bdd['SKU'] == prod_id, 'Reforço'].values[0])
-    at_img = col_alter.text_input(label="Link da imagem (ML ou Shopee)",value=bdd.loc[bdd['SKU'] == prod_id, 'Imagem'].values[0])
-    at_button = col_alter.button("Salvar as informações alteradas")
-    if at_button:
-        bdd.loc[bdd['SKU'] == prod_id, bdd.columns] = [at_ci, at_sku,at_np,at_ref,at_te,at_crd,at_loc, at_anun,at_img]
-        bdd.to_csv('database.csv', index=False,sep="\t")
-        st.success("Informações foram salvas com sucesso!")
+        at_ci = bdd.loc[bdd['SKU'] == prod_id, 'Cod. Interno'].values[0]
+        at_sku = col_alter.text_input(label="SKU",value=bdd.loc[bdd['SKU'] == prod_id, 'SKU'].values[0])
+        at_np = col_alter.text_input(label="Nome do Produto",value=bdd.loc[bdd['SKU'] == prod_id, 'Nome Produto'].values[0])
+        at_te = col_alter.text_input(label="Tamanho da Embalagem",value=bdd.loc[bdd['SKU'] == prod_id, 'Tamanho Embalagem'].values[0])
+        at_loc = col_alter.text_input(label="Localização",value=bdd.loc[bdd['SKU'] == prod_id, 'Localização'].values[0])
+        at_crd = col_alter.text_input(label="Corredor",value=bdd.loc[bdd['SKU'] == prod_id, 'Corredor'].values[0])
+        at_anun = col_alter.text_input(label="Anuncio?",value=bdd.loc[bdd['SKU'] == prod_id, 'Anuncio?'].values[0])
+        at_ref = col_alter.text_input(label="Reforço de Acetato",value=bdd.loc[bdd['SKU'] == prod_id, 'Reforço'].values[0])
+        at_img = col_alter.text_input(label="Link da imagem (ML ou Shopee)",value=bdd.loc[bdd['SKU'] == prod_id, 'Imagem'].values[0])
+        at_button = col_alter.button("Salvar as informações alteradas")
+        if at_button:
+            bdd.loc[bdd['SKU'] == prod_id, bdd.columns] = [at_ci, at_sku,at_np,at_ref,at_te,at_crd,at_loc, at_anun,at_img]
+            bdd.to_csv('database.csv', index=False,sep="\t")
+            st.success("Informações foram salvas com sucesso!")
