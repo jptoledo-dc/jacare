@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
+import os
 
 st.set_page_config(layout="wide",page_title="Jacaratinha Brinquedos",page_icon = "Jacaratinha.png")
 img, name = st.columns([1,4])
@@ -13,9 +14,24 @@ radio = st.radio("",["Resumo de Pedidos","QRCode","Consulta","Imprimir Etiquetas
 
 if radio == "Resumo de Pedidos":
     st.header("Resumo dos Pedidos")
-    uploaded_file = st.file_uploader("Escolha um arquivo Excel", type=["xlsx", "xls"])
-
+    uf, pb = st.columns([5,1])
+    uploaded_file = uf.file_uploader("Suba um arquivo RelPedidosCorImp.xls", type=["xlsx", "xls"])
     if uploaded_file:
+        if pb.button("Enviar o arquivo"):
+             # Nome do arquivo
+            file_name = uploaded_file.name
+
+            # Caminho onde o arquivo será salvo (mesma pasta do script)
+            file_path = os.path.join(os.getcwd(), file_name)
+
+            # Salva o arquivo na pasta local
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+
+            st.success(f"Arquivo {file_name} salvo com sucesso na pasta do script.")
+    file_name = "RelPedidosCorImp.xls"
+    file_path = os.path.join(os.getcwd(), file_name)
+    if os.path.isfile(file_path):
         st.subheader("Informações pertinentes")
         col1, col2, col3, col4, col5 = st.columns([1,1,1,1,1.5])
         st.subheader("Resumo das Embalagens")
@@ -24,7 +40,7 @@ if radio == "Resumo de Pedidos":
         #Base de dados com SKU
         
         #Lê o arquivo xls e retorna a tabela
-        pedidos = pd.read_excel(uploaded_file)
+        pedidos = pd.read_excel(file_name)
         pedidos = pedidos.iloc[:-1]
         pedidos["Cod Pedido"] = pedidos["Pedido"].str[:6]
         pedidos.columns = ["Quantidade","SKU","Data","Pedido com Preço", "Pedido"]
@@ -51,9 +67,9 @@ if radio == "Resumo de Pedidos":
         bag4.metric("Grande (40x60)",(pedidoSKU['Tamanho Embalagem'] == 'Grande (40 x 60)').sum())
         bag5.metric("M Grande(50x60)",(pedidoSKU['Tamanho Embalagem'] == 'Muito Grande (50 x 60)').sum())
         bag6.metric("Personalizado",(pedidoSKU['Tamanho Embalagem'].str.contains('Personalizad', case=False, na=False).sum()))
-
     else:
         st.subheader("Por favor, suba um arquivo RelPedidosCorImp.xls")
+        st.write(f"O arquivo '{file_name}' não foi encontrado no diretório.")        
 
 elif radio == "QRCode":
     st.subheader("Leitor de QRCode")
