@@ -60,7 +60,7 @@ if radio == "Resumo de Pedidos":
         col4.metric("Não Cadastrado",pedidoSKU['Nome Produto'].isna().sum())
         col5.metric("Total de Faturamento",tot_fatura.replace('.',','))
 
-
+        #['Muito Pequeno (20 x 34)','Pequeno (26 x 36)','Médio (32 x 40)','Grande (40 x 60)','Muito Grande (50 x 60)','Personalizado']
         bag1.metric("M Pequeno (20x34)",(pedidoSKU['Tamanho Embalagem'] == 'Muito Pequeno (20 x 34)').sum())
         bag2.metric("Pequeno (26x36)",(pedidoSKU['Tamanho Embalagem'] == 'Pequeno (26 x 36)').sum())
         bag3.metric("Médio (32x40)",(pedidoSKU['Tamanho Embalagem'] == 'Médio (32 x 40)').sum())
@@ -199,7 +199,9 @@ elif radio == "Alterar informações":
         at_ci = bdd.loc[bdd['SKU'] == prod_id, 'Cod. Interno'].values[0]
         at_sku = col_alter.text_input(label="SKU",value=bdd.loc[bdd['SKU'] == prod_id, 'SKU'].values[0])
         at_np = col_alter.text_input(label="Nome do Produto",value=bdd.loc[bdd['SKU'] == prod_id, 'Nome Produto'].values[0])
-        at_te = col_alter.text_input(label="Tamanho da Embalagem",value=bdd.loc[bdd['SKU'] == prod_id, 'Tamanho Embalagem'].values[0])
+        lista_emb = ['Muito Pequeno (20 x 34)','Pequeno (26 x 36)','Médio (32 x 40)','Grande (40 x 60)','Muito Grande (50 x 60)','Caixa Personalizada','Embalagem Personalizada']
+        indice = lista_emb.index(bdd.loc[bdd['SKU'] == prod_id, 'Tamanho Embalagem'].values[0])
+        at_te = col_alter.selectbox(label="Tamanho da Embalagem",index=indice,options=lista_emb)
         at_loc = col_alter.text_input(label="Localização",value=bdd.loc[bdd['SKU'] == prod_id, 'Localização'].values[0])
         at_crd = col_alter.text_input(label="Corredor",value=bdd.loc[bdd['SKU'] == prod_id, 'Corredor'].values[0])
         at_anun = col_alter.text_input(label="Anuncio?",value=bdd.loc[bdd['SKU'] == prod_id, 'Anuncio?'].values[0])
