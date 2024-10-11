@@ -184,7 +184,7 @@ elif radio == "Alterar informações":
         senha_acesso = col_sa.text_input("Insira a senha:",type="password")
         st.error("ATENÇÃO! ESSA ABA EXIGE PRIVILÉGIO DE ADMINISTRADOR, POR FAVOR, INSIRA A SENHA DE ACESSO:")
         if col_sb.button("Acessar"):
-            if senha_acesso == "PipocaCrocante":
+            if senha_acesso == "Batatinha123":
                 st.success("Acesso garantido")
                 st.session_state.acesso = True
             else:
