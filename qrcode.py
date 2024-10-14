@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from PIL import Image
 import os
+import datetime
 
 st.set_page_config(layout="wide",page_title="Jacaratinha Brinquedos",page_icon = "Jacaratinha.png")
 img, name = st.columns([1,4])
@@ -67,6 +68,31 @@ if radio == "Resumo de Pedidos":
         bag4.metric("Grande (40x60)",(pedidoSKU['Tamanho Embalagem'] == 'Grande (40 x 60)').sum())
         bag5.metric("M Grande(50x60)",(pedidoSKU['Tamanho Embalagem'] == 'Muito Grande (50 x 60)').sum())
         bag6.metric("Personalizado",(pedidoSKU['Tamanho Embalagem'].str.contains('Personalizad', case=False, na=False).sum()))
+
+        pedidos = pedidos.reindex(columns=['Pedido','Quantidade','SKU','Data','Pedido com Preço'])
+        pedidos['Lote'] = datetime.datetime.today().strftime("%d/%m/%Y")
+        pedidos['Hora'] = datetime.datetime.now().strftime("%H:%M")
+        pedidos['Quantidade'] = pedidos['Quantidade'].astype(int)
+        indices_vazios = pedidos[pedidos['Pedido'].isna() | (pedidos['Pedido'] == '')].index
+
+        for indice in indices_vazios:
+            pedido_anterior = pedidos.loc[indice-1, 'Pedido']
+            ped_original = str(pedido_anterior)+"-1"
+            ped_novo = str(pedido_anterior)+"-2"
+            pedidos.loc[indice-1,'Pedido'] = ped_original
+            pedidos.loc[indice,'Pedido'] = ped_novo
+        pedidos.set_index('Pedido', inplace=True)
+        st.write(pedidos)
+
+        #with open('planilha_isa.txt','w+') as p:
+        #    for index, row in pedidos.iterrows():
+        #        p.write(f"{row['Pedido']},{row['Quantidade']},{row['SKU']},{row['Data']},{row['Pedido com Preço']},{row['Lote']},{row['Hora']}\n".replace(",","\t"))
+        #    p.close()
+        
+        #with open('planilha_isa.txt','r+') as p:
+        #    st.text_area(label="Copie",value=p.read())
+
+
     else:
         st.subheader("Por favor, suba um arquivo RelPedidosCorImp.xls")
         st.write(f"O arquivo '{file_name}' não foi encontrado no diretório.")        
