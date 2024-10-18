@@ -3,6 +3,7 @@ import pandas as pd
 from PIL import Image
 import os
 import datetime
+import pytz
 
 st.set_page_config(layout="wide",page_title="Jacaratinha Brinquedos",page_icon = "Jacaratinha.png")
 img, name = st.columns([1,4])
@@ -11,7 +12,7 @@ name.title("Base de Dados - Jacaratinha Brinquedos")
 bdd = pd.read_csv(r"database.csv", encoding="utf-8", sep="\t")
 bdd.columns= ["Cod. Interno","SKU","Nome Produto", "Reforço", "Tamanho Embalagem","Corredor","Localização","Anuncio?","Imagem"]
 
-radio = st.radio("",["Resumo de Pedidos","QRCode","Consulta","Imprimir Etiquetas","Alterar informações"],horizontal = True)
+radio = st.radio("",["Resumo de Pedidos","Consulta","Imprimir Etiquetas","Alterar informações"],horizontal = True)
 
 if radio == "Resumo de Pedidos":
     st.header("Resumo dos Pedidos")
@@ -71,7 +72,9 @@ if radio == "Resumo de Pedidos":
 
         pedidos = pedidos.reindex(columns=['Pedido','Quantidade','SKU','Data','Pedido com Preço'])
         pedidos['Lote'] = datetime.datetime.today().strftime("%d/%m/%Y")
-        pedidos['Hora'] = datetime.datetime.now().strftime("%H:%M")
+        fuso = pytz.timezone('America/Sao_Paulo')
+        pedidos['Hora'] = datetime.datetime.now(fuso).strftime("%H:%M")
+        pedidos['Data'] = pedidos['Data'].dt.strftime("%d/%m/%Y")
         pedidos['Quantidade'] = pedidos['Quantidade'].astype(int)
         indices_vazios = pedidos[pedidos['Pedido'].isna() | (pedidos['Pedido'] == '')].index
 
@@ -96,9 +99,6 @@ if radio == "Resumo de Pedidos":
     else:
         st.subheader("Por favor, suba um arquivo RelPedidosCorImp.xls")
         st.write(f"O arquivo '{file_name}' não foi encontrado no diretório.")        
-
-elif radio == "QRCode":
-    st.subheader("Leitor de QRCode")
 
 elif radio == "Consulta":
     st.header("Consulta de Produtos")
@@ -238,3 +238,33 @@ elif radio == "Alterar informações":
             bdd.loc[bdd['SKU'] == prod_id, bdd.columns] = [at_ci, at_sku,at_np,at_ref,at_te,at_crd,at_loc, at_anun,at_img]
             bdd.to_csv('database.csv', index=False,sep="\t")
             st.success("Informações foram salvas com sucesso!")
+
+elif radio == "Teste":
+    st.title("Teste")
+
+    caminho_arquivo = r"C:\Users\Usuario\Downloads\Fichas.xlsx"  # Substitua pelo caminho correto
+
+    # Carregar o arquivo Excel
+    excel_geral = pd.ExcelFile(caminho_arquivo)
+    excel_fiscais = pd.read_excel(r"C:\Users\Usuario\Downloads\Fiscais.xlsx")
+
+    # Listar todas as abas
+    abas = excel_geral.sheet_names
+    st.write("Abas disponíveis no arquivo Excel:")
+    aba_selecionada = st.selectbox("Selecione a aba",abas)
+    df = pd.read_excel(caminho_arquivo,sheet_name=aba_selecionada)
+    filtro_sku = df[df['SKU'].str.contains('GP', na=False)]
+
+    # Retornar apenas os valores da coluna 'SKU'
+    valores_sku = filtro_sku['SKU'].tolist()
+    produto = st.selectbox("Selecione o SKU",valores_sku)
+    df_filtrado = df[df['SKU'] == produto]
+    id = df_filtrado['ID'].iloc[0]
+    geral, ficha, condicao = st.columns(3)
+    for column in df_filtrado.columns:
+            geral.write(f"{column}: \n{df_filtrado[column].iloc[0]}")
+    fiscais_filtrado = excel_fiscais[excel_fiscais['Código do Anúncio'] == id]
+    coluna_2 = fiscais_filtrado.columns[5:21]
+    for column in coluna_2:
+        if column in ['EAN','Origem','NCM','Unidade de medida comercial','Peso líquido','Peso bruto','Custo do produto','Descrição do produto para NF-e:']:
+            ficha.write(f"{column}: \n{fiscais_filtrado[column].iloc[0]}")
